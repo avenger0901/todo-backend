@@ -1,0 +1,43 @@
+{
+  "name": "todo-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "test": "exit 0",
+    "start": "node server.js",
+    "start:watch": "nodemon --ignore public server.js",
+    "create-tables": "node data/create-tables.js",
+    "drop-tables": "node data/drop-tables.js",
+    "load-seed-data": "node data/load-seed-data.js",
+    "recreate-tables": "npm run drop-tables && npm run create-tables",
+    "setup-db": "npm run recreate-tables && npm run load-seed-data",
+    "setup-db:prod": "heroku run npm run setup-db",
+    "setup-heroku": "heroku addons:create heroku-postgresql:hobby-dev && heroku config:set PGSSLMODE=require"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/avenger0901/todo-backend.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/avenger0901/todo-backend/issues"
+  },
+  "homepage": "https://github.com/avenger0901/todo-backend#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "morgan": "^1.9.1",
+    "pg": "^7.12.1"
+  },
+  "devDependencies": {
+    "eslint": "^6.6.0",
+    "nodemon": "^1.19.4"
+  }
+}

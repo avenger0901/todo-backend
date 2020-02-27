@@ -13,7 +13,7 @@ async function run() {
         INSERT INTO users (email, hash)
         VALUES ($1, $2);
     `,
-        ['cool@cool.com', 'asdfasdfasdf']);
+        ['angela@cool.com', 'angela']);
 
         await Promise.all(
             todos.map(todo => {

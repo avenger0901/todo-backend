@@ -54,8 +54,8 @@ app.get('/api/todos', async(req, res) => {
     try {
         // make a sql query using pg.Client() to select * from todos
         const result = await client.query(`
-            select * from todos;
-        `);
+        select * from todos where user_id=$1;
+    `, [req.userId]);
 
         // respond to the client with that data
         res.json(result.rows);

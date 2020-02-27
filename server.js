@@ -19,7 +19,37 @@ app.use(express.json()); // enable reading incoming json data
 // API Routes
 
 app.use(express.urlencoded({ extended: true }));
-app.get('/api/todos', async (req, res) => {
+const createAuthRoutes = require('././lib/auth/create-auth-routes');
+
+const authRoutes = createAuthRoutes({
+    selectUser(email) {
+        return client.query(`
+            SELECT id, email, hash 
+            FROM users
+            WHERE email = $1;
+        `,
+        [email]
+        ).then(result => result.rows[0]);
+    },
+    insertUser(user, hash) {
+        return client.query(`
+            INSERT into users (email, hash)
+            VALUES ($1, $2)
+            RETURNING id, email;
+        `,
+        [user.email, hash]
+        ).then(result => result.rows[0]);
+    }
+});
+// before ensure auth, but after other middleware:
+app.use('/api/auth', authRoutes);
+
+const ensureAuth = require('./lib/auth/ensure-auth');
+app.use('/api', ensureAuth);
+
+
+
+app.get('/api/todos', async(req, res) => {
 
     try {
         // make a sql query using pg.Client() to select * from todos
@@ -39,9 +69,29 @@ app.get('/api/todos', async (req, res) => {
     }
 
 });
+app.get('/api/todo/:todoId', async(req, res) => {
+    try {
+        const result = await client.query(
+            `
+          SELECT *
+          FROM todos
+          WHERE todos.id=$1`,
+      // the second parameter is an array of values to be SANITIZED then inserted into the query
+      // i only know this because of the `pg` docs
+            [req.params.todoId]
+        );
+
+        res.json(result.rows);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({
+            error: err.message || err
+        });
+    }
+});
 
 // this endpoint creates a new todo
-app.post('/api/todos', async (req, res) => {
+app.post('/api/todos', async(req, res) => {
     try {
         // the user input lives is req.body.task
 
@@ -68,7 +118,7 @@ app.post('/api/todos', async (req, res) => {
 });
 
 // this route has a body with a complete property and an id in the params
-app.put('/api/todos/:id', async (req, res) => {
+app.put('/api/todos/:id', async(req, res) => {
     try {
         const result = await client.query(`
         update todos
@@ -87,7 +137,7 @@ app.put('/api/todos/:id', async (req, res) => {
     }
 });
 
-app.delete('/api/todos/:id', async (req, res) => {
+app.delete('/api/todos/:id', async(req, res) => {
     // get the id that was passed in the route:
 
     try {

@@ -19,7 +19,7 @@ app.use(express.json()); // enable reading incoming json data
 // API Routes
 
 app.use(express.urlencoded({ extended: true }));
-const createAuthRoutes = require('././lib/auth/create-auth-routes');
+const createAuthRoutes = require('./lib/auth/create-auth-routes');
 
 const authRoutes = createAuthRoutes({
     selectUser(email) {
